@@ -23,9 +23,19 @@ router.get('/', function (req, res, next) {
 });
 
 router.post('/', function (req, res) {
-    console.log("%O", req.body);
     alertsModel.alerts = req.body;
     sortAlerts();
+
+    if (alertsModel.alerts.length > 0) {
+        for (var i = 0; i < alertsModel.alerts.length; i++) {
+            var alert = alertsModel.alerts[i];
+            if (alert.ack.length > 0) {
+                alert.ack = alert.ack.split(',');
+            } else {
+                alert.ack = [];
+            }
+        }
+    }
 
     ws.broadcast(JSON.stringify({
         event: 'upload'
@@ -85,13 +95,18 @@ router.post('/add', function (req, res) {
 
 var upload = multer({storage: multer.memoryStorage()});
 router.post('/upload', upload.single('alerts'), function (req, res) {
+    var lastId = 0;
+    if (alertsModel.alerts && alertsModel.alerts.length > 0) {
+        lastId = alertsModel.alerts[alertsModel.alerts.length - 1].id;
+    }
     if (req.file) {
-        var data = req.file.buffer.toString();
-        var alrts = JSON.parse(data).alerts;
-        for (var i = 0; i < alrts.length; i++) {
-            alrts[i].ack = [];
+        var data = JSON.parse(req.file.buffer.toString());
+        for (var i = 0; i < data.alerts.length; i++) {
+            data.alerts[i].ack = [];
+            data.alerts[i].id = lastId + 1;
+            lastId++;
         }
-        alertsModel.alerts = alertsModel.alerts.concat();
+        alertsModel.alerts = alertsModel.alerts.concat(data.alerts);
     }
     ws.broadcast(JSON.stringify({
         event: 'upload'

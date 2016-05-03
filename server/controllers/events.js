@@ -76,7 +76,10 @@ router.post('/:eventId/edit', function (req, res) {
     var eventIndex = _.findIndex(eventsModel.events, function (e) {
         return e.id == eventId
     });
+
+    var oldEvent = eventsModel.events[eventIndex];
     eventsModel.events[eventIndex] = req.body;
+    eventsModel.events[eventIndex].status = oldEvent.status;
     eventsModel.events[eventIndex].id = eventId;
     sortEvents();
 
@@ -113,12 +116,22 @@ router.post('/', function (req, res) {
 var upload = multer({storage: multer.memoryStorage()});
 router.post('/upload', upload.single('events'), function (req, res) {
     if (req.file) {
+        var lastId = 0;
+        if (eventsModel.events && eventsModel.events.length > 0) {
+            lastId = eventsModel.events[eventsModel.events.length - 1].id;
+        }
+
         var data = JSON.parse(req.file.buffer.toString());
+        for (var i = 0; i < data.events.length; i++) {
+            data.events[i].id = lastId + 1;
+            lastId++;
+        }
         eventsModel.events = eventsModel.events.concat(data.events);
+
+        ws.broadcast(JSON.stringify({
+            event: 'upload'
+        }));
     }
-    ws.broadcast(JSON.stringify({
-        event: 'upload'
-    }));
     res.location('/admin/events');
     res.redirect('/admin/events');
 });

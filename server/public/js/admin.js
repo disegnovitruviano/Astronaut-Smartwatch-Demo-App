@@ -12,7 +12,6 @@ $(document).ready(function () {
     $('#roles-save').click(function () {
         rolesTable.editableTable('get', function (records) {
             var data = JSON.stringify(records);
-            console.log(data);
             $.ajax({
                 url: '/admin/roles', // php script to retern json encoded string
                 data: data,  // serialized data to send on server
@@ -48,11 +47,9 @@ $(document).ready(function () {
                 contentType: 'application/json',
                 type: 'POST', // set sending HTTP Request type
                 success: function (data) { // callback method for further manipulations
-                    console.log("YESS");
                     window.location = '/admin/roles';
                 },
                 error: function (data) { // if error occured
-                    console.error("????");
                     window.location = '/admin/roles';
                 }
             });
@@ -79,10 +76,6 @@ $(document).ready(function () {
     var roles = [];
     $("#roles").multiselect({
         onChange: function () {
-            console.log("YYY = " + $('#roles').val().name);
-            //$("#attendees option:selected").each(function(index, user) {
-            //    attendees.push($(this).val());
-            //});
         }
     });
 
@@ -135,7 +128,6 @@ $(document).ready(function () {
         var addEventTable = $("#add-event-table").editableTable();
         addEventTable.editableTable('get', function (records) {
             var newEvent = JSON.stringify(records[0]);
-            console.log(newEvent);
             eventsTable.editableTable('add', records[0], {at: 0});
         });
     });
@@ -179,7 +171,6 @@ $(document).ready(function () {
     $('#alerts-save').click(function () {
         alertsTable.editableTable('get', function (records) {
             var data = JSON.stringify(records);
-            console.log(data);
             $.ajax({
                 url: '/admin/alerts', // php script to retern json encoded string
                 data: data,  // serialized data to send on server
@@ -246,11 +237,9 @@ $(document).ready(function () {
                 contentType: 'application/json',
                 type: 'POST', // set sending HTTP Request type
                 success: function (data) { // callback method for further manipulations
-                    console.log("YESS");
                     window.location = '/admin/comms';
                 },
                 error: function (data) { // if error occured
-                    console.error("????");
                     window.location = '/admin/comms';
                 }
             });
@@ -263,7 +252,6 @@ $(document).ready(function () {
     $('#outages-save').click(function () {
         outagesTable.editableTable('get', function (records) {
             var data = JSON.stringify(records);
-            console.log(data);
             $.ajax({
                 url: '/admin/comms/outages',
                 data: data,
@@ -293,7 +281,7 @@ $(document).ready(function () {
     });
 
     setInterval(function() {
-        var time = moment().tz('ETC/GMT').format('HH:mm:ss MM/DD/YY');
+        var time = moment().tz('ETC/GMT').format('MM/DD/YY HH:mm:ss');
         $("#clock").html(time + " GMT");
     }, 1000);
 });

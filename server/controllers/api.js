@@ -35,7 +35,7 @@ function updateCountdown(timer) {
 
 setInterval(function () {
     _.each(timersModel.timers, function (role) {
-        _.each(role, function(t) {
+        _.each(role, function (t) {
             if (t.isActive) {
                 if (t.isCountdown) {
                     updateCountdown(t);
@@ -151,8 +151,15 @@ router.put('/events/:eventId', function (req, res) {
     event.status = req.body.status;
 
     if (event.status == 'active') {
+        var eventStart = moment(event.date + " " + event.startTime, "MM/DD/YYYY HH:mm");
+        var eventEnd = moment(event.date + " " + event.endTime, "MM/DD/YYYY HH:mm");
+        var eventDuration = moment.range(eventStart, eventEnd).diff('minutes');
         event.date = moment().format("MM/DD/YYYY");
-        event.startTime = moment().format("HH:mm");
+        var startTime = moment();
+        event.startTime = startTime.format("HH:mm");
+        event.endTime = event.startTime;
+        startTime.add(eventDuration, 'minutes');
+        event.endTime = startTime.format("HH:mm");
     } else if (event.status == 'completed') {
         event.endTime = moment().format("HH:mm");
     }
@@ -165,10 +172,11 @@ router.put('/events/:eventId', function (req, res) {
         }
     }
 
+    event.controlNotification = true;
+    event.notify = false;
     ws.broadcast(JSON.stringify({
         event: 'event',
-        data: event,
-        show: false
+        data: event
     }));
 
     ws.broadcast(JSON.stringify({
@@ -192,14 +200,12 @@ router.post('/events/:eventId/timer', function (req, res) {
     event.hasTimer = true;
 
     var now = moment();
-    var start = moment(event.date + " " + event.startTime, "MM/DD/YYYY HH:mm");
     var end = moment(event.date + " " + event.endTime, "MM/DD/YYYY HH:mm");
-    var total = event.status == 'active' ? moment.range(now, end) : moment.range(now, start);
-    var countdown = event.status != 'active';
+    var total = moment.range(now, end);
 
     var timer;
     for (var i = 0; i < event.roles.length; i++) {
-        timer = addTimer(event.roles[i], countdown, event.id, total.valueOf() / 1000);
+        timer = addTimer(event.roles[i], true, event.id, total.valueOf() / 1000);
     }
 
     ws.broadcast(JSON.stringify({
