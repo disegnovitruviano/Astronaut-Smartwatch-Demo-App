@@ -240,9 +240,11 @@ angular.module('Watch')
                 if (newVal) {
                     if (socket && socket.$ready()) {
                         socket.$close();
-                        var url = newVal.splice(0, newVal.lastIndexOf(':'));
-                        socket = createWebSocket(url);
                     }
+                    
+                    var url = newVal.splice(0, newVal.lastIndexOf(':'));
+                    socket = createWebSocket(url);
+
                 }
             },
             true);
