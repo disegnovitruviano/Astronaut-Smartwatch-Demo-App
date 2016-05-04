@@ -241,11 +241,10 @@ angular.module('Watch')
                     if (socket && socket.$ready()) {
                         socket.$close();
                     }
-                    
-                    var url = newVal.splice(0, newVal.lastIndexOf(':'));
-                    socket = createWebSocket(url);
 
+                    var url = newVal.substring(0, newVal.indexOf(':'));
+                    socket = createWebSocket(url);
                 }
             },
             true);
-    })
+    });
