@@ -3,9 +3,9 @@ angular.module("Watch")
         $scope.vibrationPattern = {
             'event': [600],
             'aos': [150, 50, 150, 50, 150],
-            'Notice': [400, 200, 400],
-            'Caution': [250, 200],
-            'Critical': [200, 100]
+            'Caution': [400, 200, 400],
+            'Warning': [250, 200],
+            'Emergency': [200, 100]
         };
 
         $scope.activeNotifications = [];
@@ -30,6 +30,13 @@ angular.module("Watch")
                     $scope.main.type = message.type;
                     $scope.main.time = message.data.time;
                     break;
+                case 'upload-alerts':
+                    var lastAlert = message.data[message.data.length - 1];
+                    $scope.activeNotifications = $scope.activeNotifications.concat(message.data);
+                    $scope.main = lastAlert;
+                    $scope.main.type = message.type;
+                    $scope.main.time = lastAlert.time;
+                    break;
                 case 'event':
                     $scope.activeNotifications.push({
                         type: 'event',
@@ -42,17 +49,33 @@ angular.module("Watch")
                     $scope.main.type = message.type;
                     $scope.main.time = message.data.date + " " + message.data.startTime;
                     break;
+                case 'upload-events':
+                    var lastEvent = message.data[message.data.length - 1];
+                    $scope.activeNotifications = $scope.activeNotifications.concat(message.data);
+                    $scope.main = lastEvent;
+                    $scope.main.title = lastEvent.name;
+                    $scope.main.type = message.type;
+                    $scope.main.time = lastEvent.date + " " + lastEvent.startTime;
+                    break;
                 default:
                     return;
             }
 
-            if (message.type == 'alert' && message.data.status == 'Critical' || message.data.status == 'Caution') {
+            console.error("TOTAL NOTIFY: " + $scope.activeNotifications.length + '');
+
+            if (message.type == 'alert' && message.data.status == 'Emergency' || message.data.status == 'Warning') {
                 $scope.repeatVibration(message.data.status);
             } else if (navigator.vibrate) {
+                $scope.stopVibration();
+                var pattern;
                 if (message.type == 'alert') {
-                    navigator.vibrate($scope.vibrationPattern[message.data.status]);
+                    pattern = $scope.vibrationPattern[message.data.status];
                 } else {
-                    navigator.vibrate($scope.vibrationPattern[message.type]);
+                    pattern = $scope.vibrationPattern[message.type];
+                }
+
+                if (pattern) {
+                    navigator.vibrate(pattern);
                 }
             }
         });
@@ -64,6 +87,8 @@ angular.module("Watch")
         };
 
         $scope.repeatVibration = function (status) {
+            $scope.stopVibration();
+
             var delay = $scope.vibrationPattern[status][0] + $scope.vibrationPattern[status][1];
 
             if (navigator.vibrate) {
@@ -74,16 +99,24 @@ angular.module("Watch")
 
         };
 
+        $scope.stopVibration = function () {
+            if (navigator.vibrate) {
+                navigator.vibrate(0);
+            }
+        }
+
         $scope.mainClick = function ($event) {
             tau.changePage('hsectionchangerPage');
 
             switch ($scope.main.type) {
                 case 'alert':
+                case 'upload-alerts':
                     AppState.alert = $scope.main;
                     AppState.currentScreen = 'alert-details';
                     tau.changePage('alert-details');
                     break;
                 case 'event':
+                case 'upload-events':
                     AppState.event = $scope.main;
                     AppState.currentScreen = 'event-details';
                     tau.changePage('event-details');
@@ -108,10 +141,7 @@ angular.module("Watch")
         $scope.dismiss_ = function () {
             $scope.main = null;
             $scope.activeNotifications.splice(0, $scope.activeNotifications.length);
-            //$event.stopPropagation();
-            if (navigator.vibrate) {
-                navigator.vibrate(0);
-            }
+
             if ($scope.vibrateInterval) {
                 clearInterval($scope.vibrateInterval);
                 $scope.vibrateInterval = null;

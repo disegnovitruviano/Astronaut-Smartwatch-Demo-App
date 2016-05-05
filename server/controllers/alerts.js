@@ -108,8 +108,10 @@ router.post('/upload', upload.single('alerts'), function (req, res) {
         }
         alertsModel.alerts = alertsModel.alerts.concat(data.alerts);
     }
+
     ws.broadcast(JSON.stringify({
-        event: 'upload'
+        event: 'upload-alerts',
+        data: data.alerts
     }));
 
     res.location('/admin/alerts');

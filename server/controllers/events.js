@@ -129,7 +129,8 @@ router.post('/upload', upload.single('events'), function (req, res) {
         eventsModel.events = eventsModel.events.concat(data.events);
 
         ws.broadcast(JSON.stringify({
-            event: 'upload'
+            event: 'upload-events',
+            data: data.events
         }));
     }
     res.location('/admin/events');

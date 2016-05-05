@@ -397,8 +397,7 @@
                             <div class="circle-blue" ng-class="getAlertColorClass(alert)">
                             </div>
                             <div class="list-item-text">
-                                <h1 class="list-title">{{alert.title}}</h1>
-
+                                <h1 class="list-title" ng-class="getNewAlertClass(alert)">{{alert.title}}</h1>
                                 <h2>{{alert.time}}</h2>
                             </div>
                         </div>

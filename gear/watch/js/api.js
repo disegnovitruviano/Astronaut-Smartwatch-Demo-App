@@ -192,11 +192,13 @@ angular.module('Watch')
             });
 
             ws.$on('event', function (data) {
-                $cacheFactory.removeAll();
-                $rootScope.$emit('push', {
-                    type: 'event',
-                    data: data
-                });
+                if(_.contains(data.roles, AppState.activeRole)) {
+                    $cacheFactory.removeAll();
+                    $rootScope.$emit('push', {
+                        type: 'event',
+                        data: data
+                    });
+                }
             });
 
             ws.$on('timers', function (data) {
@@ -211,6 +213,22 @@ angular.module('Watch')
                 $cacheFactory.removeAll();
                 $rootScope.$emit('push', {
                     type: 'upload',
+                    data: data
+                });
+            });
+
+            ws.$on('upload-events', function (data) {
+                $cacheFactory.removeAll();
+                $rootScope.$emit('push', {
+                    type: 'upload-events',
+                    data: data
+                });
+            });
+
+            ws.$on('upload-alerts', function (data) {
+                $cacheFactory.removeAll();
+                $rootScope.$emit('push', {
+                    type: 'upload-alerts',
                     data: data
                 });
             });

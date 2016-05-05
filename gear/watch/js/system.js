@@ -31,12 +31,12 @@ angular.module("Watch")
                 });
             }
 
-            	var battery = navigator.battery || navigator.webkitBattery;
-            	systemInfo.battery.level = Math.floor(battery.level * 100);
+            var battery = navigator.battery || navigator.webkitBattery;
+            systemInfo.battery.level = Math.floor(battery.level * 100);
 
-                    battery.addEventListener('levelchange',  function () {
-                    	systemInfo.battery.level = Math.floor(battery.level * 100);
-                    });
+            battery.addEventListener('levelchange', function () {
+                systemInfo.battery.level = Math.floor(battery.level * 100);
+            });
 
 
         }

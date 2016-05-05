@@ -45,6 +45,7 @@ angular.module('Watch')
                     var date = new Date(alert.date + " " + alert.time);
                     return date;
                 }, true);
+
             } else {
                 $scope.sortType = true;
                 $scope.sortDate = false;
@@ -71,6 +72,14 @@ angular.module('Watch')
                 return 'alert-caution';
             } else if (alert.status == 'Emergency') {
                 return 'alert-emergency';
+            }
+        };
+
+        $scope.getNewAlertClass = function(alert) {
+            if(!_.contains(alert.ack, AppState.activeRole)) {
+                return 'new-alert';
+            } else {
+                return '';
             }
         };
 

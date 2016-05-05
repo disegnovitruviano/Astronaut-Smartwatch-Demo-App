@@ -44,6 +44,10 @@ angular.module('Watch')
             $scope.refresh();
         });
 
+        $rootScope.$on('upload-events', function () {
+            $scope.refresh();
+        });
+
         $scope.fetchNew = function () {
             $scope.currentPage++;
             Api.events().get({role: $scope.activeRole, page: $scope.currentPage}, function (data) {
