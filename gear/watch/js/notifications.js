@@ -5,7 +5,8 @@ angular.module("Watch")
             'aos': [150, 50, 150, 50, 150],
             'Caution': [400, 200, 400],
             'Warning': [250, 200],
-            'Emergency': [200, 100]
+            'Emergency': [200, 100],
+            'Advisory': [200]
         };
 
         $scope.activeNotifications = [];
@@ -61,17 +62,16 @@ angular.module("Watch")
                     return;
             }
 
-            console.error("TOTAL NOTIFY: " + $scope.activeNotifications.length + '');
-
-            if (message.type == 'alert' && message.data.status == 'Emergency' || message.data.status == 'Warning') {
-                $scope.repeatVibration(message.data.status);
+            if (($scope.main.type == 'alert' || $scope.main.type == 'upload-alerts')
+                && ($scope.main.status == 'Emergency' || $scope.main.status == 'Warning')) {
+                $scope.repeatVibration($scope.main.status);
             } else if (navigator.vibrate) {
                 $scope.stopVibration();
                 var pattern;
-                if (message.type == 'alert') {
-                    pattern = $scope.vibrationPattern[message.data.status];
+                if ($scope.main.type == 'alert' || $scope.main.type == 'upload-alerts') {
+                    pattern = $scope.vibrationPattern[$scope.main.status];
                 } else {
-                    pattern = $scope.vibrationPattern[message.type];
+                    pattern = $scope.vibrationPattern[$scope.main.type];
                 }
 
                 if (pattern) {
@@ -103,7 +103,11 @@ angular.module("Watch")
             if (navigator.vibrate) {
                 navigator.vibrate(0);
             }
-        }
+            clearInterval($scope.vibrateInterval);
+            if (navigator.vibrate) {
+                navigator.vibrate(0);
+            }
+        };
 
         $scope.mainClick = function ($event) {
             tau.changePage('hsectionchangerPage');
@@ -146,5 +150,7 @@ angular.module("Watch")
                 clearInterval($scope.vibrateInterval);
                 $scope.vibrateInterval = null;
             }
+
+            $scope.stopVibration();
         };
     });

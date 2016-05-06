@@ -87,7 +87,9 @@ var upload = multer({storage: multer.memoryStorage()});
 router.post('/upload', upload.single('comms'), function (req, res) {
     if (req.file) {
         var data = req.file.buffer.toString();
+        var oldOutages = commsModel.comms.outages;
         commsModel.comms = JSON.parse(data).comms;
+        commsModel.comms.outages = oldOutages.concat(commsModel.comms.outages);
     }
     ws.broadcast(JSON.stringify({
         event: 'upload'
